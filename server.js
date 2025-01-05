@@ -17,7 +17,10 @@ app.listen(PORT, () => {
 });
 
 function initializeMidi() {
+  
   const input = new midi.Input();
+
+  const activeNotes = new Set();
 
   const portCount = input.getPortCount();
   console.log(`Nombre de ports MIDI disponibles: ${portCount}`);
@@ -32,7 +35,6 @@ function initializeMidi() {
     console.log('Port MIDI ouvert.');
 
     const midiToNote = (note) => {
-      console.log(note)
       const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
       const octave = Math.floor(note / 12) - 1;
       const noteName = notes[note % 12];
@@ -41,13 +43,29 @@ function initializeMidi() {
 
     input.on('message', (deltaTime, message) => {
       const [status, note, velocity] = message;
-      //console.log(`Message MIDI reçu: [${status}, ${note}, ${velocity}]`);
-
-      if (status >= 144 && status <= 159) {
-        const action = status >= 144 && status <= 159 ? 'Note On' : 'Note Off';
-        const noteName = midiToNote(note);
-        console.log(`Action: ${action}, Note: ${noteName}`);
+    
+      if (status >= 144 && status <= 159 && velocity > 0) {
+        activeNotes.add(note%12); 
       }
+
+      if ((status >= 128 && status <= 143) || (status >= 144 && velocity === 0)) {
+        activeNotes.delete(note%12); 
+      };
+      const sortedNotes = Array.from(activeNotes).sort((a, b) => a - b);
+      console.log(sortedNotes)
+      const rootNote = sortedNotes[0];
+      if (sortedNotes.length == 3){
+        const notesArray = sortedNotes
+        if (notesArray[2]- notesArray[1]==3 && notesArray[1]-notesArray[0]==4){
+          console.log(`accord majeur mon gars en ${midiToNote(notesArray[0])}`)
+        } else if (notesArray[2]- notesArray[1]==4 && notesArray[1]-notesArray[0]==3){
+          console.log(`accord mineur mon gars en ${midiToNote(notesArray[0])}`)
+        } else {
+          console.log("non")
+        }
+
+      }
+      
     });
 
     input.ignoreTypes(false, false, false);
