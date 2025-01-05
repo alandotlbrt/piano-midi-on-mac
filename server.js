@@ -32,6 +32,7 @@ function initializeMidi() {
     console.log('Port MIDI ouvert.');
 
     const midiToNote = (note) => {
+      console.log(note)
       const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
       const octave = Math.floor(note / 12) - 1;
       const noteName = notes[note % 12];
@@ -40,12 +41,12 @@ function initializeMidi() {
 
     input.on('message', (deltaTime, message) => {
       const [status, note, velocity] = message;
-      console.log(`Message MIDI reçu: [${status}, ${note}, ${velocity}]`);
+      //console.log(`Message MIDI reçu: [${status}, ${note}, ${velocity}]`);
 
       if (status >= 144 && status <= 159) {
         const action = status >= 144 && status <= 159 ? 'Note On' : 'Note Off';
         const noteName = midiToNote(note);
-        console.log(`Action: ${action}, Note: ${noteName}, Vélocité: ${velocity}`);
+        console.log(`Action: ${action}, Note: ${noteName}`);
       }
     });
 
